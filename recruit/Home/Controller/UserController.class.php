@@ -16,18 +16,21 @@ use Think\Controller;
 class UserController extends Controller {
 
     public function doLogin() {
-        $studentBasicInfo = new StudentBasicInfoModel();
-        $student = $studentBasicInfo->getStudentInfoByXh(I('post.xh', ''));
-        if (!$student) {
-            die('fail');
-        }
-        $password = I('post.password', '');
-        if (md5('spf'.$password) != $student['password']) {
-            die('fail');
+        // echo "string";
+        // $studentBasicInfo = new StudentBasicInfoModel();
+        // $student = $studentBasicInfo->getStudentInfoByXh();
+        $map["xh"] = I('post.xh', '');
+        $map["password"] = md5('spf'.I('post.password', ''));
+        $studentinfo = M("student_basic_info")->where($map)->find();
+        if (!$studentinfo) {
+            $this->ajaxReturn(array("status" => 0, "info" => "用户名或密码错误", "data" => $map));
+        }else{
+            session_start();
+            unset($studentinfo["password"]);
+            session("xh",$studentinfo["xh"]);//登陆成功后将学生学号、姓名写入session
+            session("name",$studentinfo["name"]);
+            $this->ajaxReturn(array("status" => 1, "info" => "success", "data" => $studentinfo));
         };
-        session_start();
-        session(['xh'], $student['xh']);
-        echo 'ok';
     }
 
     public function doLogout() {
@@ -67,31 +70,28 @@ class UserController extends Controller {
         $studentBasicInfo = new StudentBasicInfoModel();
         $data['xh'] = I('post.xh', '', '/^[BHYQ][\d]+/i');
         $data['name'] = I('post.name', '', '/^[\x{4e00}-\x{9fa5}]+$/u');
-        $data['birthday'] = (int)$_POST['birthday-y'].'-'.(int)$_POST['birthday-m'].'-'.(int)$_POST['birthday-d'];
-        $data['year'] = date('Y');
         $data['password'] = I('post.password', '');
-        $data['qq'] = I('post.qq', '', 'number_int');
-        $data['mail'] = I('post.mail', '', 'email');
-        $data['phone'] = I('post.phone', '', 'number_int');
-        $data['sex'] = I('post.sex', '', 'number_int');
-        $data['dorm'] = I('post.dorm', '');
-        $data['college'] = I('post.college', '');
-        $data['gaozhong'] = I('gaozhong', '');
         // 检查提交数据完整程度
         foreach($data as $key => $value) {
             if (!$value) {
-                die($key);
-            }
+                $this->ajaxReturn(array("status" => 0, "info" => $value."缺失"));
+            } 
         }
         $data['password'] = md5('spf'.$data['password']);
-        if ($studentBasicInfo->addStudent($data)) {
-            echo 'ok';
-        } else {
-            echo 'fail';
+        $map["xh"] = $data["xh"];
+        if ($studentBasicInfo->where($map)->count() > 0) {
+            $this->ajaxReturn(array("status" => 0, "info" => "此学号已被注册,如果忘记密码请寻找社团管理员"));
+        }else{
+            $back = $studentBasicInfo->add($data);
+            $returndata["data"] = $back;
+            $returndata["info"] = "成功";
+            $returndata["status"] = 1;
+            $this->ajaxReturn($returndata);
         }
     }
 
     public function doRegAssociation() {
+        //新增添加报名信息
         $studentRecruitInfo = new StudentRecruitInfoModel();
         $data['xh'] = I('session.xh', '');
         $data['department1'] = I('post.department1', '');
@@ -99,47 +99,72 @@ class UserController extends Controller {
         $data['association'] = I('post.association', '');
         foreach($data as $key => $value) {
             if (!$value) {
-                die($key);
+            $this->ajaxReturn(array("status" => 0, "info" => $value."缺失"));
             }
         }
         $data['quest1'] = I('post.quest1', '');
         $data['quest2'] = I('post.quest2', '');
         $data['quest3'] = I('post.quest3', '');
         $res = $studentRecruitInfo->studentRegisterAssociation($data['xh'], $data);
-        echo $res;
+        if ($res) {
+            $this->ajaxReturn(array("status" => 1, "info" => "成功"));
+        }else{
+            $this->ajaxReturn(array("status" => 0, "info" => "新增失败"));
+        }
     }
 
     public function doChangeDepartment() {
+        //修改报名信息
         $studentRecruitInfo = new StudentRecruitInfoModel();
-        $xh = I('session.xh', '');
+        $map["xh"] = I('session.xh', '');
+        $map["id"] = I('post.id');
         $changed['department1'] = I('post.department1', '');
         $changed['department2'] = I('post.department2', '');
-        $association = I('post.association');
-        if (!$xh) {
-            die('relogin');
+        $changed['quest1'] = I('post.quest1', '');
+        $changed['quest2'] = I('post.quest2', '');
+        $changed['quest3'] = I('post.quest3', '');
+        if (!$map["xh"]) {
+            $this->ajaxReturn(array("status" => 0, "info" => "未登录"));
         }
-        echo $studentRecruitInfo->studentChangeDepartment($xh,$changed, $association);
+        if ($studentRecruitInfo->where($map)->save($changed)) {
+            $this->ajaxReturn(array("status" => 1, "info" => "成功"));
+        }else{
+            $this->ajaxReturn(array("status" => 0, "info" => "更新失败"));
+        }
     }
-
+    public function delDepartment(){
+        //删除报名信息
+        $map["xh"] = I('session.xh', '');
+        $map["id"] = I('post.id');
+        if (!$map["xh"]) {
+            $this->ajaxReturn(array("status" => 0, "info" => "未登录"));
+        }
+        if ($studentRecruitInfo->where($map)->delete()) {
+            $this->ajaxReturn(array("status" => 1, "info" => "成功"));
+        }else{
+            $this->ajaxReturn(array("status" => 0, "info" => "删除失败"));
+        }
+    }
     public function doChangePassword() {
-        $xh = I('session.xh', '');
-        if (!$xh) {
-            die('relogin');
+        $map["xh"] = I('session.xh', '');
+        if (!$map["xh"]) {
+            $this->ajaxReturn(array("status" => 0, "info" => "未登录"));
         }
         $old = md5('spf'.I('post.old', ''));
         $current = I('post.current', '');
-        $student = getStuInfo();
+        $student = M("student_basic_info")->where($map)->find();
         if ($student['password'] != $old) {
-            die('old_pass_mismatch');
+            $this->ajaxReturn(array("status" => 0, "info" => "旧密码不正确"));
         } else {
             if (strlen($current) < 8) {
-                die('too_short');
+                $this->ajaxReturn(array("status" => 0, "info" => "新密码太短"));
             }
             $res = D('StudentBasicInfo')->setStudentPassword($xh, md5('spf'.$current));
             if (!$res) {
-                die('fail');
+                $this->ajaxReturn(array("status" => 0, "info" => "更新失败"));
+            }else{
+                $this->ajaxReturn(array("status" => 1, "info" => "成功"));
             }
-            echo 'success';
         }
     }
 
@@ -157,10 +182,25 @@ class UserController extends Controller {
         // 检查提交数据完整程度
         foreach($data as $key => $value) {
             if (!$value) {
-                die($key);
+                $this->ajaxReturn(array("status" => 0, "info" => $value."缺失"));
             }
         }
-        echo D('StudentBasicInfo')->updateStudentInfo($student['xh'], $data);
+        $map["xh"] = I("session.xh", "");
+        $b = D('StudentBasicInfo')->where($map)->save($data);
+        if ($b){
+            $this->ajaxReturn(array("status" => 1, "info" => "成功"));
+        }else{
+            $this->ajaxReturn(array("status" => 0, "info" => "更新失败", "data" => $data));
+        };
+    }
+    public function associationinfo(){
+        //此接口用于查询社团信息，发送社团名称，返回社团的3个问题以及社团的所有部门
+        $name = I("associationname","");
+        $departments = M("association_departments")->where(array("association" => $name))->field("departmentName")->select();
+        $info = M("association_list")->where(array("associationname" => $name))->field("associationName,quest1,quest2,quest3")->find();
+        $info["departments"] = $departments;
+        $this->ajaxReturn(array("status" => 0, "data" => $info));
+
     }
 
 }

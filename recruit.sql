@@ -1,72 +1,67 @@
--- phpMyAdmin SQL Dump
--- version 4.0.4.1
--- http://www.phpmyadmin.net
---
--- Host: 127.0.0.1
--- Generation Time: Apr 18, 2015 at 03:00 PM
--- Server version: 5.5.32
--- PHP Version: 5.4.19
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
+-- --------------------------------------------------------
+-- 主机:                           127.0.0.1
+-- 服务器版本:                        5.6.16 - MySQL Community Server (GPL)
+-- 服务器操作系统:                      Win32
+-- HeidiSQL 版本:                  8.3.0.4694
+-- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
---
--- Database: `recruit`
---
-CREATE DATABASE IF NOT EXISTS `recruit` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+-- 导出 recruit 的数据库结构
+DROP DATABASE IF EXISTS `recruit`;
+CREATE DATABASE IF NOT EXISTS `recruit` /*!40100 DEFAULT CHARACTER SET utf8 */;
 USE `recruit`;
 
--- --------------------------------------------------------
 
---
--- Table structure for table `association_departments`
---
-
+-- 导出  表 recruit.association_departments 结构
+DROP TABLE IF EXISTS `association_departments`;
 CREATE TABLE IF NOT EXISTS `association_departments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `departmentId` int(11) NOT NULL,
-  `departmentName` text NOT NULL,
-  `username` text NOT NULL,
-  `password` text NOT NULL,
-  `association` int(11) NOT NULL,
+  `departmentName` text NOT NULL COMMENT '部门名称',
+  `username` text NOT NULL COMMENT '部门管理员用户名',
+  `password` text NOT NULL COMMENT '部门管理员密码',
+  `association` varchar(50) NOT NULL COMMENT '所属社团名称',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='部门账户列表,若部门id为0但社团id不为0则为该社团管理员账户,若全部为0则是root用户' AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
--- --------------------------------------------------------
+-- 正在导出表  recruit.association_departments 的数据：~3 rows (大约)
+DELETE FROM `association_departments`;
+/*!40000 ALTER TABLE `association_departments` DISABLE KEYS */;
+INSERT INTO `association_departments` (`id`, `departmentName`, `username`, `password`, `association`) VALUES
+	(1, '网络部', 'wlb', '0cf282ab36ee1936701bb2f177a75e93', '校科协'),
+	(2, '计算机部', 'jsj', '12619d9358f501617b5a4d9c3e07f2bf', '校科协'),
+	(3, '文化部', 'whb', 'f65fb21e12cc89944e07a9a5eb70a4d3', '学生会'),
+	(4, '学习部', 'xxb', 'f0ce78c4e8283cc56e4283053658aaf7', '学生会');
+/*!40000 ALTER TABLE `association_departments` ENABLE KEYS */;
 
---
--- Table structure for table `association_list`
---
 
+-- 导出  表 recruit.association_list 结构
+DROP TABLE IF EXISTS `association_list`;
 CREATE TABLE IF NOT EXISTS `association_list` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `associationName` varchar(40) NOT NULL,
-  `quest1` longtext,
-  `quest2` longtext,
-  `quest3` longtext,
+  `quest1` text NOT NULL,
+  `quest2` text NOT NULL,
+  `quest3` text NOT NULL,
+  `username` text NOT NULL COMMENT '社团管理员用户名',
+  `password` text NOT NULL COMMENT '社团管理员密码',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `association_list`
---
+-- 正在导出表  recruit.association_list 的数据：~2 rows (大约)
+DELETE FROM `association_list`;
+/*!40000 ALTER TABLE `association_list` DISABLE KEYS */;
+INSERT INTO `association_list` (`id`, `associationName`, `quest1`, `quest2`, `quest3`, `username`, `password`) VALUES
+	(1, '校科协', '你喜欢吃芥末吗', '你是二次元还是三次元', '你的性取向是什么', 'sast', 'c35bf0d93d1c02b152d1e49a30460047'),
+	(2, '学生会', '你的星座是什么', '你怎么看待董嘉睿', '你喜欢什么运动', 'stu', 'ebece9185bc89be8c96782d4db4323fe');
+/*!40000 ALTER TABLE `association_list` ENABLE KEYS */;
 
-INSERT INTO `association_list` (`id`, `associationName`, `quest1`, `quest2`, `quest3`) VALUES
-(1, 'Test1', 'foo', 'bar', NULL),
-(2, 'Test2', NULL, 'foo2', 'bar2');
 
--- --------------------------------------------------------
-
---
--- Table structure for table `student_basic_info`
---
-
+-- 导出  表 recruit.student_basic_info 结构
+DROP TABLE IF EXISTS `student_basic_info`;
 CREATE TABLE IF NOT EXISTS `student_basic_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `xh` varchar(20) NOT NULL,
@@ -83,41 +78,39 @@ CREATE TABLE IF NOT EXISTS `student_basic_info` (
   `major` text NOT NULL,
   `gaozhong` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='记录基本信息如学号,姓名等' AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `student_basic_info`
---
-
+-- 正在导出表  recruit.student_basic_info 的数据：~2 rows (大约)
+DELETE FROM `student_basic_info`;
+/*!40000 ALTER TABLE `student_basic_info` DISABLE KEYS */;
 INSERT INTO `student_basic_info` (`id`, `xh`, `name`, `birthday`, `year`, `password`, `qq`, `mail`, `phone`, `sex`, `dorm`, `college`, `major`, `gaozhong`) VALUES
-(1, 'B11111111', '我', '1993-11-05', 1993, 'qweqwe', 213123, '12312@121', 2132132, 22, '21321', '321312', '', '');
+	(1, 'B11111111', '我', '1993-11-05', 1993, 'ef16dc54dc337985f09629c0f850c70a', 213123, '12312@121', 2132132, 2, '21321', '321312', 'aaaa', 'sss'),
+	(4, 'B13011226', '诸鑫强', '1994-11-08', 1994, 'e9e03d9a6ee5df50a1761719740d119a', 123123, '123@qq.com', 12345678901, 1, '1232', 'ed', 'dd', 'dd');
+/*!40000 ALTER TABLE `student_basic_info` ENABLE KEYS */;
 
--- --------------------------------------------------------
 
---
--- Table structure for table `student_recruit_info`
---
-
+-- 导出  表 recruit.student_recruit_info 结构
+DROP TABLE IF EXISTS `student_recruit_info`;
 CREATE TABLE IF NOT EXISTS `student_recruit_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `xh` varchar(20) NOT NULL,
-  `department1` int(11) NOT NULL,
-  `department2` int(11) NOT NULL,
-  `association` int(11) NOT NULL,
-  `quest1` longtext,
-  `quest2` longtext,
-  `quest3` longtext,
-  `acceptState` int(11) DEFAULT NULL,
+  `department1` int(11) NOT NULL COMMENT '所报部门id',
+  `department2` int(11) NOT NULL COMMENT '所报第二部门id',
+  `association` text NOT NULL COMMENT '所报社团名称',
+  `quest1` text,
+  `quest2` text,
+  `quest3` text,
+  `acceptState` varchar(50) DEFAULT '0' COMMENT '0表示暂无结果，-1表示被第一部门拒绝，-2表示被第二部门拒绝，其他正数表示录取部门id',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `student_recruit_info`
---
-
+-- 正在导出表  recruit.student_recruit_info 的数据：~2 rows (大约)
+DELETE FROM `student_recruit_info`;
+/*!40000 ALTER TABLE `student_recruit_info` DISABLE KEYS */;
 INSERT INTO `student_recruit_info` (`id`, `xh`, `department1`, `department2`, `association`, `quest1`, `quest2`, `quest3`, `acceptState`) VALUES
-(1, 'B11111111', 2, 3, 1, 'hehe', 'qwqw', 'edf', NULL);
-
+	(1, 'B13011226', 1, 2, '校科协', '你猜', '你再猜', '就不告诉你', '2'),
+	(2, 'B13011226', 3, 4, '学生会', '不', '不是的', '不是这样的', '0');
+/*!40000 ALTER TABLE `student_recruit_info` ENABLE KEYS */;
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
