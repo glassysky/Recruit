@@ -34,12 +34,14 @@ class IndexController extends Controller {
     }
 
     // 报名、修改志愿
-    // 注意：添加新的报名请向/Home/User/doRegAssociation进行POST
+    // 注意：添加新的报名请向/Home/User/doRegAssociation 进行POST
     // 修改志愿向/Home/User/doChangeDepartment
     public function changeDepartment() {
         getStuInfo();//登陆检测
         $map["xh"] = I("session.xh","");
         $recruitInfo = M("student_recruit_info")->where($map)->select();
+        $associations = M("association_list")->select();
+        $this->assign("associations",$associations);
         $this->assign("recruitInfo",$recruitInfo);//在前端用这个recruitInfo来存储此学生所有的报名信息
         //在前端一定要存着每条已有的报名信息的id号，删除和更新的时候一定要发送id号，否则无法执行
         $this->display();
@@ -56,7 +58,7 @@ class IndexController extends Controller {
     }
 
     // 修改密码
-    // 向/Home/User/doChangeDepartment进行POST
+    // 向/Home/User/doChangePassword进行POST
     public function changePassword() {
         getStuInfo();//登陆检测
         $this->display();
